@@ -43,8 +43,13 @@ class Workcell(object):
 class Workrow(object):
     def __init__(self,id,span,cells={}):
         self._id = id
-        self._span = span
+        self._span = []
         self._cell = cells
+        ss = span.split()
+        for s in ss:
+            r = s.split(':')
+            self._span.append((int(r[0]),int(r[1])))
+      
 
     @property
     def id(self):
@@ -56,6 +61,16 @@ class Workrow(object):
 
     def cell(self,col):
         return self._cell.get(col)
+
+    def values(self):
+        v = []
+        for i in range(1,self._span[-1][1]+1):
+            if self.cell(i):
+                v.append(self.cell(i).value)
+            else:
+                v.append(None)
+        return v
+        
 
 class Worksheet(object):
     def __init__(self,name,workbook,path):
@@ -95,6 +110,9 @@ class Worksheet(object):
             self._get_cells()
         return self._row.get(n)
 
+    def row_cell_values(self,n):
+        pass
+
     def cell(self,x,y):
         if not self._cell:
             self._get_cells()
@@ -114,6 +132,19 @@ class Worksheet(object):
         while i<=self.bottom:
             yield self.row(i) 
             i += 1
+
+    def row_values_iter(self):
+        i = 1
+        while i<=self.bottom:
+            yield self.row(i).values()
+            i += 1 
+
+    def save_csv(self,filename):
+        import csv
+        f = open(filename,'wb')
+        writer = csv.writer(f)
+        writer.writerows(workbook.sheet(1).row_values_iter())
+        f.close()
 
 class Spreadsheet(OOXMLBase):
     def __init__(self, filename):
@@ -152,4 +183,5 @@ class Spreadsheet(OOXMLBase):
 if "__main__"==__name__:
     import sys
     workbook = Spreadsheet(sys.argv[1])
+    workbook.sheet(1).save_csv(sys.argv[2])
     #pass
