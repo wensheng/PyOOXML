@@ -29,12 +29,6 @@ class OOXMLBase(object):
         self._get_content_types()
         self._get_package_relationship()
         self._get_part_relationship()
-        #if 'officeDocument' in self.package_relationship:
-        #    if self.package_relationship['officeDocument'] in self.override_type \
-        #        and self.override_type[self.package_relationship['officeDocument']] \
-        #        == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
-        #        self.process_main_document()
-        #self.process_main_document()
 
     def _get_content_types(self):
         file = OFile(self.package.read("[Content_Types].xml"))
@@ -56,9 +50,6 @@ class OOXMLBase(object):
                 if r_type.endswith(i):
                     self.package_relationship[i]=elm.get('Target')
                     break
-
-    def process_main_document(self):
-        raise NotImplementedError
 
     def _get_part_relationship(self):
         raise NotImplementedError
