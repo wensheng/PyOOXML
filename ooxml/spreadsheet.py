@@ -40,6 +40,22 @@ class Workcell(object):
         
     value = property(get_value, set_value)
 
+class Workrow(object):
+    def __init__(self,id,span,cells={}):
+        self._id = id
+        self._span = span
+        self._cell = cells
+
+    @property
+    def span(self):
+        return self._span
+
+    def cell(self,col):
+        return self._cell.get(col)
+
+    def set_cell(self,col,cell):
+        self._cell[col]=cell
+
 class Worksheet(object):
     def __init__(self,name,workbook,path):
         self.name = name
@@ -50,6 +66,7 @@ class Worksheet(object):
 
     def get_sheet(self):
         self.sheet = OFile(self.workbook.package.read(self.path))
+        self.dimension = self.sheet.tree.find('.//%sdimension'%self.sheet.ns).get('ref') 
         return self
 
     def _get_cells(self):
@@ -57,7 +74,8 @@ class Worksheet(object):
             return
         rows = self.sheet.tree.findall('.//%srow'%self.sheet.ns) 
         for row in rows:
-            self._row[int(row.get('r'))]={}
+            rowid = int(row.get('r'))
+            _row = Workrow(rowid,row.get('spans'))
             for c in row:
                 for v in c:
                     if v.tag==(self.sheet.ns+'v'):
@@ -65,20 +83,25 @@ class Worksheet(object):
                         break
                 xy = al2d(c.get('r'))
                 self._cell[xy]=Workcell(xy[0],xy[1],t)
-                self._row[int(row.get('r'))][xy[1]]=self._cell[xy]
+                #self._row[int(row.get('r'))][xy[1]]=self._cell[xy]
+                _row.set_cell(xy[1],self._cell[xy])
+            self._row[rowid]=_row
+             
 
     def row(self,n):
         if not self._row:
             self._get_cells()
-        return self._row[n]
+        return self._row.get(n)
 
     def cell(self,x,y):
         if not self._cell:
             self._get_cells()
-        try:
-            return self._cell[x,y]
-        except KeyError:
-            return None
+        return self._cell.get(x,y)
+
+    def rows(self):
+        if not self._row:
+            self._get_cells()
+        return self._row
 
 class Spreadsheet(OOXMLBase):
     def __init__(self, filename):
@@ -105,6 +128,6 @@ class Spreadsheet(OOXMLBase):
 
 if "__main__"==__name__:
     import sys
-    #workbook = Spreadsheet(sys.argv[1])
-    #sheet = workbook.sheet(1)
-    pass
+    workbook = Spreadsheet(sys.argv[1])
+    sheet = workbook.sheet(1)
+    #pass
