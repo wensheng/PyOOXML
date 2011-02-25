@@ -1,0 +1,6 @@
+note.txt
+build
+dist
+ooxml.egg-info
+ooxml/.*\.xlsx
+ooxml/.*\.pyc
