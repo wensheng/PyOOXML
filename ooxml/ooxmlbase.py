@@ -19,6 +19,7 @@ else:
 class OFile(object):
     def __init__(self,string):
         self.tree = ElementTree.fromstring(string)
+        #self.ns=self.tree.nsmap[None]
         self.ns=self.tree.tag[:self.tree.tag.rindex('}')+1]
 
 
