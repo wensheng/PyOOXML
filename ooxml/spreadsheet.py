@@ -96,12 +96,16 @@ class Worksheet(object):
     def cell(self,x,y):
         if not self._cell:
             self._get_cells()
-        return self._cell.get(x,y)
+        return self._cell.get((x,y))
 
     def rows(self):
         if not self._row:
             self._get_cells()
         return self._row
+
+    @property
+    def nrows(self):
+        return len(self.rows())
 
 class Spreadsheet(OOXMLBase):
     def __init__(self, filename):
@@ -119,15 +123,25 @@ class Spreadsheet(OOXMLBase):
     def _process_workbook(self):
         doc = OFile(self.package.read(self.package_relationship['officeDocument']))
         self._sheet={}
+        self._sheet_names={}
         for elm in doc.tree.findall('.//%ssheet'%doc.ns):
-            self._sheet[int(elm.get('sheetId'))] = Worksheet(elm.get('name'),self,(self.docpath+'/'+self.part_relationship[elm.get('{%s}id'%doc.tree.nsmap['r'])][1]))
+            id = int(elm.get('sheetId'))
+            name = elm.get('name')
+            self._sheet[id] = Worksheet(name,self,(self.docpath+'/'+self.part_relationship[elm.get('{%s}id'%doc.tree.nsmap['r'])][1]))
+            self._sheet_names[name]=id
 
     def sheet(self,id):
-        return self._sheet[id].get_sheet()
-        
+        if type(id)==type(""):
+            return self._sheet[self._sheet_names[id]].get_sheet()
+        else:
+            return self._sheet[id].get_sheet()
+
+    @property
+    def sheet_names(self):
+        return self._sheet_names.keys()
+ 
 
 if "__main__"==__name__:
     import sys
-    workbook = Spreadsheet(sys.argv[1])
-    sheet = workbook.sheet(1)
-    #pass
+    #workbook = Spreadsheet(sys.argv[1])
+    pass
