@@ -3,8 +3,8 @@
 # Copyright (c) 2011 Wensheng Wang
 # MIT license
 
-from ooxmlbase import OFile, OOXMLBase
-
+import os
+from ooxmlbase import OFile, OOXMLBase, tmpl_dir
 
 def al2d(s):
     col = 0
@@ -76,15 +76,19 @@ class Worksheet(object):
     def __init__(self,name,workbook,path):
         self.name = name
         self.workbook = workbook
+        self.sheet = None
         self.path = path
         self._row = {}
         self._cell = {}
+        self.top, self.left, self.bottom, self.right = 0,0,0,0
 
     def get_sheet(self):
-        self.sheet = OFile(self.workbook.package.read(self.path))
-        dimension = self.sheet.tree.find('.//%sdimension'%self.sheet.ns).get('ref').split(':')  
-        self.top, self.left = al2d(dimension[0])
-        self.bottom, self.right = al2d(dimension[1])
+        if self.workbook.package:
+            self.sheet = OFile(self.workbook.package.read(self.path))
+            dimension = self.sheet.tree.find('.//%sdimension'%self.sheet.ns).get('ref').split(':')  
+            if len(dimension)==2:
+                self.top, self.left = al2d(dimension[0])
+                self.bottom, self.right = al2d(dimension[1])
         return self
 
     def _get_cells(self):
@@ -118,6 +122,12 @@ class Worksheet(object):
             self._get_cells()
         return self._cell.get((x,y))
 
+    def set_cell(self,x,y,v):
+        if self._cell.get((x,y)):
+            self._cell[(x,y)].value = v
+        else:
+            self._cell[(x,y)]=Workcell(x,y,v)
+
     def rows(self):
         if not self._row:
             self._get_cells()
@@ -147,8 +157,15 @@ class Worksheet(object):
         f.close()
 
 class Spreadsheet(OOXMLBase):
-    def __init__(self, filename):
+    def __init__(self, filename=None):
+        if not filename:
+            filename = os.path.join(tmpl_dir,'workbook.xlsx')
+            self._is_new = True
+        else:
+            self._is_new = False
         super(Spreadsheet,self).__init__(filename)
+        self._sheet={}
+        self._sheet_names={}
         self._process_workbook()
 
     def _get_part_relationship(self):
@@ -161,8 +178,6 @@ class Spreadsheet(OOXMLBase):
 
     def _process_workbook(self):
         doc = OFile(self.package.read(self.package_relationship['officeDocument']))
-        self._sheet={}
-        self._sheet_names={}
         for elm in doc.tree.findall('.//%ssheet'%doc.ns):
             id = int(elm.get('sheetId'))
             name = elm.get('name')
@@ -174,6 +189,17 @@ class Spreadsheet(OOXMLBase):
             return self._sheet[self._sheet_names[id]].get_sheet()
         else:
             return self._sheet[id].get_sheet()
+
+    def add_sheet(self,name):
+        id = len(self._sheet_names)+1
+        if not name:
+            name = 'Sheet'+id
+        self._sheet_names[name]=id
+        if not self.docpath:
+            self.docpath = 'xl'
+            #do lots of other stuff
+        self._sheet[id] = Worksheet(name,self,"") #fixme
+
 
     @property
     def sheet_names(self):

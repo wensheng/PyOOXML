@@ -3,6 +3,7 @@
 # MIT license
 
 import sys
+import os.path
 import zipfile
 try: from lxml import etree as ElementTree
 except ImportError: from xml.etree import cElementTree as ElementTree
@@ -16,6 +17,8 @@ else:
     raise ImportError, "must use python 3 or >=2.5"
 
 
+tmpl_dir = os.path.join(os.path.dirname(__file__),'ooxml-templates')
+
 class OFile(object):
     def __init__(self,string):
         self.tree = ElementTree.fromstring(string)
@@ -24,7 +27,9 @@ class OFile(object):
 
 
 class OOXMLBase(object):
-    def __init__(self, filename):
+    def __init__(self, filename=None):
+        self.docpath = None
+        self.package = None
         self.package = zipfile.ZipFile(filename,"r")
         self._get_content_types()
         self._get_package_relationship()

@@ -37,5 +37,8 @@ setup(
     include_package_data=True,
     install_requires=[],
     entry_points = {},
-    extras_require={}
+    extras_require={},
+    data_files=[
+          ('ooxml/ooxml-templates', ['ooxml/ooxml-templates/workbook.xlsx']),
+          ]
     )
