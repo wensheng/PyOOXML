@@ -143,7 +143,7 @@ class Worksheet(object):
         import csv
         f = open(filename,'wb')
         writer = csv.writer(f)
-        writer.writerows(workbook.sheet(1).row_values_iter())
+        writer.writerows(self.row_values_iter())
         f.close()
 
 class Spreadsheet(OOXMLBase):
