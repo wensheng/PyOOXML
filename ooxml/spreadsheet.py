@@ -4,7 +4,16 @@
 # MIT license
 
 import os
+import sys
 from ooxmlbase import OFile, OOXMLBase, tmpl_dir
+if sys.version_info[0]==3:
+    import io
+    BytesIO = io.BytesIO
+elif sys.version_info[0]==2 and sys.version_info[1]>4:
+    import StringIO
+    BytesIO = StringIO.StringIO
+else:
+    raise ImportError, "must use python 3 or >=2.5"
 
 def al2d(s):
     col = 0
@@ -49,7 +58,6 @@ class Workrow(object):
         for s in ss:
             r = s.split(':')
             self._span.append((int(r[0]),int(r[1])))
-      
 
     @property
     def id(self):
@@ -158,6 +166,7 @@ class Worksheet(object):
 
 class Spreadsheet(OOXMLBase):
     def __init__(self, filename=None):
+        self.filename = filename
         if not filename:
             filename = os.path.join(tmpl_dir,'workbook.xlsx')
             self._is_new = True
@@ -200,14 +209,28 @@ class Spreadsheet(OOXMLBase):
             #do lots of other stuff
         self._sheet[id] = Worksheet(name,self,"") #fixme
 
-
     @property
     def sheet_names(self):
         return self._sheet_names.keys()
+
+    def save(self,filename):
+        bytesio = BytesIO()
+        import xml.etree.cElementTree as ET
+        ET.ElementTree(self.sheet(1).sheet.tree).write(bytesio)
+
+        if self.filename:
+            self.package.close()
+     
+        import zipfile
+        zip = zipfile.ZipFile(filename or self.filename or "workbook.xlsx",'w',zipfile.ZIP_DEFLATED)
+        zip.writestr('test',bytesio.getvalue())
+        bytesio.close()
+        zip.close()
  
 
 if "__main__"==__name__:
     import sys
     workbook = Spreadsheet(sys.argv[1])
     workbook.sheet(1).save_csv(sys.argv[2])
+    workbook.save(sys.argv[3])
     #pass
