@@ -14,7 +14,7 @@ package_dir = os.path.join(os.path.dirname(__file__),'ooxml')
 
 setup(
     name='ooxml',
-    version=file(os.path.join(package_dir,'version.txt')).read().strip(),
+    version=open(os.path.join(package_dir,'version.txt')).read().strip(),
     author='Wensheng Wang',
     author_email='wenshengwang@gmail.com',
     license='MIT',
