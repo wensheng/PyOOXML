@@ -7,14 +7,13 @@ import os.path
 import zipfile
 try: from lxml import etree as ElementTree
 except ImportError: from xml.etree import cElementTree as ElementTree
+
 if sys.version_info[0]==3:
     import io
     BytesIO = io.BytesIO
-elif sys.version_info[0]==2 and sys.version_info[1]>4:
+else:
     import StringIO
     BytesIO = StringIO.StringIO
-else:
-    raise ImportError, "must use python 3 or >=2.5"
 
 
 tmpl_dir = os.path.join(os.path.dirname(__file__),'ooxml-templates')
