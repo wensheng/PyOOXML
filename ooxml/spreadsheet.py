@@ -9,11 +9,9 @@ from ooxmlbase import OFile, OOXMLBase, tmpl_dir
 if sys.version_info[0]==3:
     import io
     BytesIO = io.BytesIO
-elif sys.version_info[0]==2 and sys.version_info[1]>4:
+else:
     import StringIO
     BytesIO = StringIO.StringIO
-else:
-    raise ImportError, "must use python 3 or >=2.5"
 
 def al2d(s):
     col = 0
@@ -109,7 +107,10 @@ class Worksheet(object):
             for c in row:
                 for v in c:
                     if v.tag==(self.sheet.ns+'v'):
-                        t = v.text
+                        if c.get('t')=='s':
+                            t=self.workbook.s_string[int(v.text)]
+                        else:
+                            t = v.text
                         break
                 xy = al2d(c.get('r'))
                 self._cell[xy]=Workcell(xy[0],xy[1],t)
@@ -184,13 +185,23 @@ class Spreadsheet(OOXMLBase):
         self.part_relationship = {}
         for elm in doc.tree:
             self.part_relationship[elm.get('Id')]=(elm.get('Type'),elm.get('Target'))
+            if elm.get('Type') and elm.get('Type')=="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings":
+                self._process_shared_strings(elm.get('Target'))
+
+    def _process_shared_strings(self,target):
+        self.s_string = []
+        doc = OFile(self.package.read(self.docpath+'/'+target))
+        for elm in doc.tree.getiterator("%st"%doc.ns):
+            self.s_string.append(elm.text)
 
     def _process_workbook(self):
         doc = OFile(self.package.read(self.package_relationship['officeDocument']))
         for elm in doc.tree.findall('.//%ssheet'%doc.ns):
             id = int(elm.get('sheetId'))
             name = elm.get('name')
-            self._sheet[id] = Worksheet(name,self,(self.docpath+'/'+self.part_relationship[elm.get('{%s}id'%doc.tree.nsmap['r'])][1]))
+            #Hack: this doesn't work in ElementTree because it doesn't have nsmap, use explict QFN  
+            #self._sheet[id] = Worksheet(name,self,(self.docpath+'/'+self.part_relationship[elm.get('{%s}id'%doc.tree.nsmap['r'])][1]))
+            self._sheet[id] = Worksheet(name,self,(self.docpath+'/'+self.part_relationship[elm.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")][1]))
             self._sheet_names[name]=id
 
     def sheet(self,id):
