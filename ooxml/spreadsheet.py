@@ -61,10 +61,6 @@ class Workrow(object):
     def id(self):
         return self._id
 
-    @property
-    def span(self):
-        return self._span
-
     def cell(self,col):
         return self._cell.get(col)
 
@@ -105,6 +101,7 @@ class Worksheet(object):
             rowid = int(row.get('r'))
             rowcell = {}
             for c in row:
+                t = None
                 for v in c:
                     if v.tag==(self.sheet.ns+'v'):
                         if c.get('t')=='s':
@@ -115,7 +112,9 @@ class Worksheet(object):
                 xy = al2d(c.get('r'))
                 self._cell[xy]=Workcell(xy[0],xy[1],t)
                 rowcell[xy[1]] = self._cell[xy]
-            self._row[rowid] = Workrow(rowid,row.get('spans'),rowcell)
+            #self._row[rowid] = Workrow(rowid,row.get('spans'),rowcell)
+            span = row.get('spans','%s:%s'%(self.left,self.right))
+            self._row[rowid] = Workrow(rowid,span,rowcell)
              
 
     def row(self,n):
@@ -242,6 +241,6 @@ class Spreadsheet(OOXMLBase):
 if "__main__"==__name__:
     import sys
     workbook = Spreadsheet(sys.argv[1])
-    workbook.sheet(1).save_csv(sys.argv[2])
-    workbook.save(sys.argv[3])
+    #workbook.sheet(1).save_csv(sys.argv[2])
+    #workbook.save(sys.argv[3])
     #pass

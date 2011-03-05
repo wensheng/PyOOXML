@@ -5,21 +5,19 @@
 # http://www.opensource.org/licenses/mit-license.html
 
 import os
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-package_dir = os.path.join(os.path.dirname(__file__),'ooxml')
+#try:
+#    from setuptools import setup
+#except ImportError:
+from distutils.core import setup
 
 setup(
     name='ooxml',
-    version=open(os.path.join(package_dir,'version.txt')).read().strip(),
+    version=open('version.txt').read().strip(),
     author='Wensheng Wang',
     author_email='wenshengwang@gmail.com',
     license='MIT',
     description="Python interface for working with OOXML files such as docx, xlsx.",
-    long_description=open(os.path.join(package_dir,'description.txt')).read(),
+    long_description=open('README.txt').read(),
     url='https://bitbucket.org/wensheng/pyooxml',
     keywords="word excel powerpoint ooxml",
     classifiers=[
@@ -33,12 +31,9 @@ setup(
     ],
 	platforms = 'Platform Independent',
     packages=['ooxml'],
-    zip_safe=False,
-    include_package_data=True,
-    install_requires=[],
-    entry_points = {},
-    extras_require={},
-    data_files=[
-          ('ooxml/ooxml-templates', ['ooxml/ooxml-templates/workbook.xlsx']),
-          ]
+    include_package_data=True
     )
+#	package_data = { "":['*.txt']},
+#    data_files=[
+#          ('ooxml/ooxml-templates', ['ooxml/ooxml-templates/workbook.xlsx']),
+#          ]
