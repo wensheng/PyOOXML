@@ -1,0 +1,2 @@
+include *.txt
+exclude note.txt TODO.txt

@@ -1,0 +1,2 @@
+0.2.1
+stop use row.spans, from spec, it's optional. Thanks Francesco Tartaggia for point it out and patch.
