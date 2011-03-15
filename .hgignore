@@ -1,4 +1,6 @@
 note.txt
+TODO.txt
+MANIFEST
 build
 dist
 ooxml.egg-info

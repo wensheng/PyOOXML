@@ -5,10 +5,10 @@
 # http://www.opensource.org/licenses/mit-license.html
 
 import os
-#try:
-#    from setuptools import setup
-#except ImportError:
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 setup(
     name='ooxml',
@@ -21,19 +21,17 @@ setup(
     url='https://bitbucket.org/wensheng/pyooxml',
     keywords="word excel powerpoint ooxml",
     classifiers=[
-		'Operating System :: OS Independent',
-		'Programming Language :: Python',
-    	'License :: OSI Approved :: MIT License',
-    	'Development Status :: 3 - Alpha',
-	    'Intended Audience :: Developers',
-    	'Topic :: Office/Business :: Financial :: Spreadsheet',
-		'Topic :: Software Development :: Libraries :: Python Modules',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'License :: OSI Approved :: MIT License',
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'Topic :: Office/Business :: Financial :: Spreadsheet',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-	platforms = 'Platform Independent',
+    platforms = 'Platform Independent',
     packages=['ooxml'],
-    include_package_data=True
-    )
-#	package_data = { "":['*.txt']},
-#    data_files=[
-#          ('ooxml/ooxml-templates', ['ooxml/ooxml-templates/workbook.xlsx']),
-#          ]
+    data_files=[
+        ('ooxml/ooxml-templates', ['ooxml/ooxml-templates/workbook.xlsx']),
+    ]
+)
